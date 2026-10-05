@@ -1,0 +1,29 @@
+<% content_for :title, "Tracer — Configurações" %>
+
+<div class="head"><h1>Lembretes</h1></div>
+<div class="sub muted">Frequência e período em que o Tracer lembra você das pendências</div>
+
+<div class="config">
+  <%= form_with url: settings_path, method: :patch do |form| %>
+    <div class="config-row">
+      <span>Frequência</span>
+      <%= form.select :notify_interval_minutes,
+            options_for_select([["A cada 15 min", "15"], ["A cada 30 min", "30"],
+                                ["A cada 45 min", "45"], ["A cada 1h", "60"],
+                                ["A cada 2h", "120"]], @intervalo) %>
+    </div>
+    <div class="config-row">
+      <span>Período ativo</span>
+      <span class="periodo">
+        <%= form.select :notify_active_start,
+              options_for_select(hora_options, @inicio) %>
+        <span class="muted">até</span>
+        <%= form.select :notify_active_end,
+              options_for_select(hora_options, @fim) %>
+      </span>
+    </div>
+    <div class="config-actions">
+      <%= form.submit "Salvar", class: "btn btn-accent" %>
+    </div>
+  <% end %>
+</div>

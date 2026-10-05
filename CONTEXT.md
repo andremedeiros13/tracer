@@ -1,0 +1,30 @@
+# Tracer
+
+Ferramenta interna para engenheiros de software: rastreamento de entregas diárias,
+histórico de 1-on-1 via transcrições, e To-Dos com **notificações nativas do S.O.**
+para quebrar o estado de hiperfoco.
+
+## Domínios (bounded contexts)
+
+- **Todos** — painel de To-Do e ciclo de notificação (a POC). Glossário:
+  `app/domains/todos/CONTEXT.md`
+- **Tracking** — rastreio de entregas (Jira, commits/PRs) — futuro:
+  `app/domains/tracking/README.md`
+- **OneOnOnes** — parsing de transcrições de 1-on-1 — futuro:
+  `app/domains/one_on_ones/README.md`
+
+## Linguagem
+
+- **To-Do (Tarefa)**: unidade de pendência, com origem e estado
+- **Fila de atenção**: painel principal — pendências ordenadas pelo que vence primeiro
+- **Snoozed**: lembrete silenciado até X; a tarefa continua na fila até ser concluída
+- **Resumo único por ciclo**: 1 notificação nativa por ciclo com o count de pendências
+- **Notificação nativa**: alerta do S.O. via comandos nativos (`notify-send` /
+  `osascript` / PowerShell toast) — nunca notificação de browser
+- **Origem**: `manual` | `via_jira` | `via_transcricao`
+
+## Diretrizes
+
+- **Sem IA/LLM**: todo parsing é nativo da aplicação (PRD, vige para todo o projeto)
+- **Cross-platform desktop**: Linux, macOS, Windows (sem iPhone/push)
+- Controllers thin; lógica de domínio em `app/domains/*/use_cases` com interface `.call`

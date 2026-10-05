@@ -1,0 +1,14 @@
+[Unit]
+Description=Tracer — painel de To-Do + notificações nativas (daemon)
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Repositories/tracer
+ExecStart=%h/Repositories/tracer/bin/start
+Restart=on-failure
+RestartSec=5s
+SyslogIdentifier=tracer
+
+[Install]
+WantedBy=default.target

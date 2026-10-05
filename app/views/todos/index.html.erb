@@ -1,0 +1,53 @@
+<% content_for :title, "Tracer — To-Do" %>
+
+<div class="head">
+  <h1>O que precisa de você</h1>
+</div>
+<div class="sub muted">
+  Ordenado pelo que vence primeiro · hoje, <%= Date.current.strftime("%d/%m") %>
+</div>
+
+<div class="new-todo">
+  <%= form_with url: todos_path, method: :post do |form| %>
+    <%= form.text_field :title, placeholder: "Nova tarefa...", required: true, class: "input" %>
+    <%= form.submit "+ Adicionar", class: "btn btn-accent" %>
+  <% end %>
+</div>
+
+<% if @pendencias.empty? %>
+  <div class="empty muted">Nenhuma pendência. Tudo em ordem! 🎉</div>
+<% end %>
+
+<% @pendencias.each do |todo| %>
+  <div class="alert <%= 'alert-snoozed' if todo.snoozed? %>">
+    <div class="ico"><%= todo.snoozed? ? "⏰" : "🔔" %></div>
+    <div class="alert-body">
+      <strong><%= todo.title %></strong>
+      <div class="meta">
+        <%= label_da_origem(todo.origin) %>
+        <% if todo.snoozed? && todo.snoozed_until > Time.current %>
+          · silenciado até <%= todo.snoozed_until.strftime("%H:%M") %>
+        <% end %>
+        <% if todo.notified_count > 0 %>
+          · lembrete disparado <%= pluralize(todo.notified_count, "x") %>
+        <% end %>
+      </div>
+      <div class="acts">
+        <%= button_to "Concluir", complete_todo_path(todo), method: :patch, class: "btn btn-accent" %>
+        <%= button_to "Adiar 1h", snooze_todo_path(todo), method: :patch, class: "btn" %>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<% if @concluidas.any? %>
+  <div class="rest">
+    <h2>Concluídas hoje</h2>
+    <% @concluidas.each do |todo| %>
+      <div class="rest-item">
+        <span class="done"><%= todo.title %></span>
+        <span class="muted"><%= todo.updated_at.strftime("%H:%M") %></span>
+      </div>
+    <% end %>
+  </div>
+<% end %>

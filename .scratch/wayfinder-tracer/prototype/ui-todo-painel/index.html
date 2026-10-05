@@ -1,0 +1,319 @@
+<!doctype html>
+<!-- PROTOTYPE, throwaway — question: "Como deve parecer o painel de To-Do da POC do Tracer?" -->
+<!-- Three radically different variants, switchable via ?variant= (or the floating bottom bar). -->
+<!-- Embasado nos templates de referência documentados na pesquisa (ticket #4): Pickolab Studio (Figma), Taskify (ThemeForest), next-shadcn-dashboard-starter, devdash. -->
+<!-- Static data, no persistence. Serve with: python3 -m http.server 4517 (from this directory). -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel To-Do — Prototype</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --ink: #1a202c;
+    --ink-soft: #64748b;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --danger: #dc2626;
+    --ok: #16a34a;
+    --border: #e2e8f0;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117;
+      --surface: #171a23;
+      --ink: #e5e9f0;
+      --ink-soft: #8b93a7;
+      --accent: #818cf8;
+      --accent-soft: #232742;
+      --danger: #f87171;
+      --ok: #4ade80;
+      --border: #262b38;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  h1 { font-size: 20px; margin: 0; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin: 0 0 10px; }
+  .btn {
+    display: inline-block; border: 1px solid var(--border); background: var(--surface);
+    color: var(--ink); border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer;
+  }
+  .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px;
+    padding: 2px 9px; background: var(--accent-soft); color: var(--accent);
+  }
+  .pill-danger { background: #fee2e2; color: var(--danger); }
+  .pill-ok { background: #dcfce7; color: var(--ok); }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .pill-danger { background: #3b1a1a; }
+    :root:not([data-theme="light"]) .pill-ok { background: #14301f; }
+  }
+  .muted { color: var(--ink-soft); font-size: 12px; }
+
+  /* ---- Prototype switcher (fixed bar) ---- */
+  #switcher {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    background: #111827; color: #f9fafb; border-radius: 999px;
+    padding: 8px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.35);
+    z-index: 999; font-size: 13px; font-weight: 500;
+  }
+  #switcher button {
+    background: none; border: none; color: #f9fafb; font-size: 16px; cursor: pointer; padding: 2px 6px;
+  }
+  #switcher button:hover { color: #a5b4fc; }
+
+  /* ================= VARIANT A — "Lista focada" (lição: design para dados vivos; sidebar mínima) ================= */
+  .va-shell { display: flex; min-height: 100vh; }
+  .va-side {
+    width: 220px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 18px 14px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .va-side .brand { font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .va-side .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); }
+  .va-nav { padding: 7px 10px; border-radius: 8px; color: var(--ink-soft); font-size: 14px; }
+  .va-nav.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .va-main { flex: 1; padding: 22px 28px; max-width: 860px; }
+  .va-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .va-list { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  .va-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .va-item:last-child { border-bottom: none; }
+  .va-item.done .va-title { text-decoration: line-through; color: var(--ink-soft); }
+  .va-check {
+    width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border);
+    flex-shrink: 0; cursor: pointer; display: grid; place-items: center; font-size: 11px; color: transparent;
+  }
+  .va-check.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .va-title { flex: 1; }
+  .va-notify { display: flex; align-items: center; gap: 6px; }
+
+  /* ================= VARIANT B — "Colunas por fonte" (lição: widgets independentes, sem acoplamento — devdash) ================= */
+  .vb-wrap { padding: 22px 28px; max-width: 1200px; margin: 0 auto; }
+  .vb-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .vb-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .vb-cols { grid-template-columns: 1fr; } }
+  .vb-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .vb-col h2 { display: flex; align-items: center; justify-content: space-between; }
+  .vb-card { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .vb-card .src { font-size: 11px; color: var(--ink-soft); margin-top: 6px; display: block; }
+  .vb-notify-card { border-style: dashed; text-align: center; padding: 14px; }
+  .vb-notify-card strong { display: block; margin-bottom: 4px; }
+
+  /* ================= VARIANT C — "Fila de atenção" (prioridade: o que vence primeiro; sem grade de cards) ================= */
+  .vc-wrap { max-width: 640px; margin: 0 auto; padding: 26px 20px 90px; }
+  .vc-head { text-align: center; margin-bottom: 6px; }
+  .vc-sub { text-align: center; margin-bottom: 24px; }
+  .vc-alert {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--danger);
+    border-radius: 8px; padding: 14px 16px; margin-bottom: 12px;
+  }
+  .vc-alert .ico { font-size: 20px; line-height: 1.2; }
+  .vc-alert .meta { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+  .vc-alert .acts { margin-top: 10px; display: flex; gap: 8px; }
+  .vc-rest { margin-top: 26px; }
+  .vc-rest-item { display: flex; justify-content: space-between; padding: 9px 4px; border-bottom: 1px dashed var(--border); font-size: 14px; }
+  .vc-config { margin-top: 26px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
+  .vc-config-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .vc-config-row:last-child { margin-bottom: 0; }
+  select {
+    background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+    border-radius: 8px; padding: 5px 10px; font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ VARIANT A ============ -->
+<div class="va-shell" data-variant="A">
+  <aside class="va-side">
+    <div class="brand"><span class="dot"></span> Tracer</div>
+    <div class="va-nav active">To-Do</div>
+    <div class="va-nav">Entregas do dia</div>
+    <div class="va-nav">1-on-1</div>
+    <div class="va-nav">Configurações</div>
+    <div style="margin-top:auto" class="muted">v0.0.1 · POC</div>
+  </aside>
+  <main class="va-main">
+    <div class="va-head">
+      <h1>To-Do</h1>
+      <button class="btn btn-accent">+ Nova tarefa</button>
+    </div>
+    <div class="muted" style="margin-bottom:10px">4 pendentes · 1 concluída hoje · lembretes a cada 45 min</div>
+    <div class="va-list">
+      <div class="va-item">
+        <div class="va-check" onclick="toggle(this)">✓</div>
+        <div class="va-title">Revisar PR #142 — auth-service <span class="pill pill-danger">code review</span></div>
+        <div class="va-notify" title="Origem: atribuição via Jira">🔔</div>
+      </div>
+      <div class="va-item">
+        <div class="va-check" onclick="toggle(this)">✓</div>
+        <div class="va-title">Enviar resumo da weekly para o time</div>
+        <div class="va-notify" title="Origem: manual">🔔</div>
+      </div>
+      <div class="va-item">
+        <div class="va-check" onclick="toggle(this)">✓</div>
+        <div class="va-title">Combinado 1-on-1: agendarPairPrograming com o estagiário</div>
+        <div class="va-notify" title="Origem: transcrição 1-on-1">🔔</div>
+      </div>
+      <div class="va-item">
+        <div class="va-check" onclick="toggle(this)">✓</div>
+        <div class="va-title">Atualizar doc de deploy do serviço de billing</div>
+        <div class="va-notify" title="Origem: manual">🔔</div>
+      </div>
+      <div class="va-item done">
+        <div class="va-check on" onclick="toggle(this)">✓</div>
+        <div class="va-title">Fechar card TRAC-331</div>
+        <div class="va-notify" title="Origem: Jira">🔔</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ============ VARIANT B ============ -->
+<div class="vb-wrap" data-variant="B" hidden>
+  <div class="vb-head">
+    <h1>Painel Tracer</h1>
+    <button class="btn btn-accent">+ Nova tarefa</button>
+  </div>
+  <div class="vb-cols">
+    <div class="vb-col">
+      <h2>Code Reviews <span class="pill pill-danger">2</span></h2>
+      <div class="vb-card">
+        <strong>Revisar PR #142 — auth-service</strong>
+        <span class="src">via Jira · atribuído há 2h</span>
+      </div>
+      <div class="vb-card">
+        <strong>Revisar PR #147 — tracker-web</strong>
+        <span class="src">via Jira · atribuído hoje</span>
+      </div>
+    </div>
+    <div class="vb-col">
+      <h2>Manuais <span class="pill">3</span></h2>
+      <div class="vb-card">
+        <strong>Enviar resumo da weekly para o time</strong>
+        <span class="src">criado por você</span>
+      </div>
+      <div class="vb-card">
+        <strong>Atualizar doc de deploy do billing</strong>
+        <span class="src">criado por você</span>
+      </div>
+      <div class="vb-card">
+        <strong>Responder e-mail do fornecedor</strong>
+        <span class="src">criado por você</span>
+      </div>
+    </div>
+    <div class="vb-col">
+      <h2>1-on-1 <span class="pill">1</span></h2>
+      <div class="vb-card">
+        <strong>Agendar pair programming com o estagiário</strong>
+        <span class="src">transcrição de 14/09</span>
+      </div>
+      <div class="vb-card vb-notify-card">
+        <strong>🔔 Próximo lembrete</strong>
+        <span class="muted">em 22 min · a cada 45 min</span>
+        <div style="margin-top:10px"><button class="btn">Configurar</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ VARIANT C ============ -->
+<div class="vc-wrap" data-variant="C" hidden>
+  <div class="vc-head"><h1>O que precisa de você</h1></div>
+  <div class="vc-sub muted">Ordenado pelo que vence primeiro · hoje, 05/10</div>
+
+  <div class="vc-alert">
+    <div class="ico">🔔</div>
+    <div>
+      <strong>Revisar PR #142 — auth-service</strong>
+      <div class="meta">code review · via Jira · atribuído há 2h · lembrete disparado 1x</div>
+      <div class="acts">
+        <button class="btn btn-accent">Abrir PR</button>
+        <button class="btn">Concluir</button>
+        <button class="btn">Adiar 1h</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="vc-alert">
+    <div class="ico">📋</div>
+    <div>
+      <strong>Combinado 1-on-1: agendar pair programming com o estagiário</strong>
+      <div class="meta">da transcrição de 14/09 · lembrete disparado 3x</div>
+      <div class="acts">
+        <button class="btn btn-accent">Concluir</button>
+        <button class="btn">Adiar 1h</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="vc-rest">
+    <h2>Restante do dia</h2>
+    <div class="vc-rest-item"><span>Enviar resumo da weekly para o time</span><span class="muted">manual</span></div>
+    <div class="vc-rest-item"><span>Atualizar doc de deploy do billing</span><span class="muted">manual</span></div>
+    <div class="vc-rest-item" style="text-decoration:line-through;color:var(--ink-soft)"><span>Fechar card TRAC-331</span><span class="pill-ok pill">concluída</span></div>
+  </div>
+
+  <div class="vc-config">
+    <h2>Lembretes</h2>
+    <div class="vc-config-row"><span>Frequência</span>
+      <select><option>A cada 45 min</option><option>A cada 30 min</option><option>A cada 1h</option><option>2x ao dia</option></select>
+    </div>
+    <div class="vc-config-row"><span>Período ativo</span>
+      <select><option>09:00 – 18:00</option><option>08:00 – 20:00</option></select>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Floating switcher ============ -->
+<div id="switcher">
+  <button onclick="cycle(-1)" aria-label="Variante anterior">←</button>
+  <span id="sw-label"></span>
+  <button onclick="cycle(1)" aria-label="Próxima variante">→</button>
+</div>
+
+<script>
+  const VARIANTS = { A: "Lista focada (sidebar)", B: "Colunas por fonte (widgets)", C: "Fila de atenção (prioridade)" };
+  function current() {
+    const v = new URLSearchParams(location.search).get("variant");
+    return VARIANTS[v] ? v : "A";
+  }
+  function render() {
+    const v = current();
+    document.querySelectorAll("[data-variant]").forEach(el => el.hidden = el.dataset.variant !== v);
+    document.getElementById("sw-label").textContent = v + " — " + VARIANTS[v];
+  }
+  function cycle(dir) {
+    const keys = Object.keys(VARIANTS);
+    const i = keys.indexOf(current());
+    const next = keys[(i + dir + keys.length) % keys.length];
+    const url = new URL(location);
+    url.searchParams.set("variant", next);
+    location.replace(url);
+  }
+  function toggle(box) {
+    box.classList.toggle("on");
+    box.closest(".va-item").classList.toggle("done", box.classList.contains("on"));
+  }
+  document.addEventListener("keydown", e => {
+    if (["INPUT","TEXTAREA"].includes(document.activeElement.tagName) || document.activeElement.isContentEditable) return;
+    if (e.key === "ArrowLeft") cycle(-1);
+    if (e.key === "ArrowRight") cycle(1);
+  });
+  render();
+</script>
+</body>
+</html>

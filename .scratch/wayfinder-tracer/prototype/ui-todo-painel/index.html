@@ -112,7 +112,16 @@
   .vb-notify-card strong { display: block; margin-bottom: 4px; }
 
   /* ================= VARIANT C — "Fila de atenção" (prioridade: o que vence primeiro; sem grade de cards) ================= */
-  .vc-wrap { max-width: 640px; margin: 0 auto; padding: 26px 20px 90px; }
+  .vc-shell { display: flex; min-height: 100vh; }
+  .vc-side {
+    width: 220px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 18px 14px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .vc-side .brand { font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .vc-side .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); }
+  .vc-nav { padding: 7px 10px; border-radius: 8px; color: var(--ink-soft); font-size: 14px; }
+  .vc-nav.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .vc-wrap { flex: 1; max-width: 900px; padding: 26px 28px 90px; }
   .vc-head { text-align: center; margin-bottom: 6px; }
   .vc-sub { text-align: center; margin-bottom: 24px; }
   .vc-alert {
@@ -231,7 +240,16 @@
 </div>
 
 <!-- ============ VARIANT C ============ -->
-<div class="vc-wrap" data-variant="C" hidden>
+<div class="vc-shell" data-variant="C" hidden>
+  <aside class="vc-side">
+    <div class="brand"><span class="dot"></span> Tracer</div>
+    <div class="vc-nav active">To-Do</div>
+    <div class="vc-nav">Entregas do dia</div>
+    <div class="vc-nav">1-on-1</div>
+    <div class="vc-nav">Configurações</div>
+    <div style="margin-top:auto" class="muted">v0.0.1 · POC</div>
+  </aside>
+  <div class="vc-wrap">
   <div class="vc-head"><h1>O que precisa de você</h1></div>
   <div class="vc-sub muted">Ordenado pelo que vence primeiro · hoje, 05/10</div>
 

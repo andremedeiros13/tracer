@@ -1,0 +1,246 @@
+<!doctype html>
+<!-- PROTOTYPE, throwaway — question: "Como deve parecer a página de Entregas do dia?" -->
+<!-- Two variants, switchable via ?variant= (or the floating bottom bar). -->
+<!-- Formato decidido (ticket #11): snapshot do dia persistido, histórico navegável por dia, org inteira, badges de fonte. -->
+<!-- Static data, no persistence. Serve with: python3 -m http.server 4517 (from this directory). -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entregas do dia — Prototype</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --surface: #ffffff;
+    --ink: #1a202c;
+    --ink-soft: #64748b;
+    --accent: #4f46e5;
+    --accent-soft: #eef2ff;
+    --danger: #dc2626;
+    --ok: #16a34a;
+    --border: #e2e8f0;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1117;
+      --surface: #171a23;
+      --ink: #e5e9f0;
+      --ink-soft: #8b93a7;
+      --accent: #818cf8;
+      --accent-soft: #232742;
+      --danger: #f87171;
+      --ok: #4ade80;
+      --border: #262b38;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+  h1 { font-size: 20px; margin: 0; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); margin: 0 0 10px; }
+  .muted { color: var(--ink-soft); font-size: 12px; }
+  .pill {
+    display: inline-block; font-size: 11px; font-weight: 600; border-radius: 999px;
+    padding: 2px 9px; background: var(--accent-soft); color: var(--accent);
+  }
+  .pill-jira { background: #e0f2fe; color: #0369a1; }
+  .pill-pr { background: #dcfce7; color: var(--ok); }
+  .pill-commit { background: #fef3c7; color: #b45309; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .pill-jira { background: #17293a; }
+    :root:not([data-theme="light"]) .pill-pr { background: #14301f; }
+    :root:not([data-theme="light"]) .pill-commit { background: #33270e; }
+  }
+
+  /* ---- Prototype switcher ---- */
+  #switcher {
+    position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 10px;
+    background: #111827; color: #f9fafb; border-radius: 999px;
+    padding: 8px 16px; box-shadow: 0 6px 24px rgba(0,0,0,.35);
+    z-index: 999; font-size: 13px; font-weight: 500;
+  }
+  #switcher button { background: none; border: none; color: #f9fafb; font-size: 16px; cursor: pointer; padding: 2px 6px; }
+  #switcher button:hover { color: #a5b4fc; }
+
+  /* ---- Shell (sidebar + conteúdo centralizado) — igual ao validado ---- */
+  .shell { display: flex; min-height: 100vh; }
+  .side {
+    width: 220px; flex-shrink: 0; background: var(--surface); border-right: 1px solid var(--border);
+    padding: 18px 14px; display: flex; flex-direction: column; gap: 4px;
+  }
+  .side .brand { font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .side .brand .dot { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); }
+  .nav { padding: 7px 10px; border-radius: 8px; color: var(--ink-soft); font-size: 14px; text-decoration: none; display: block; }
+  .nav.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .version { margin-top: auto; }
+  .wrap { flex: 1; max-width: 900px; margin: 0 auto; padding: 26px 28px 90px; }
+
+  /* ---- Navegação por dia ---- */
+  .day-nav {
+    display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px;
+  }
+  .day-nav button {
+    background: var(--surface); border: 1px solid var(--border); color: var(--ink);
+    border-radius: 8px; padding: 6px 14px; font-size: 13px; cursor: pointer;
+  }
+  .day-nav .day { font-weight: 600; font-size: 15px; }
+
+  /* ================= VARIANT A — "Timeline do dia" ================= */
+  .va-timeline { position: relative; padding-left: 24px; }
+  .va-timeline::before {
+    content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--border);
+  }
+  .va-entry { position: relative; margin-bottom: 18px; }
+  .va-entry::before {
+    content: ""; position: absolute; left: -22px; top: 6px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); border: 2px solid var(--bg);
+  }
+  .va-entry .hora { font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
+  .va-entry .titulo { font-weight: 600; }
+  .va-entry .meta { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+
+  /* ================= VARIANT B — "Seções por fonte" ================= */
+  .vb-section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 16px;
+  }
+  .vb-section h2 { display: flex; align-items: center; justify-content: space-between; }
+  .vb-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 0;
+    border-bottom: 1px dashed var(--border); font-size: 14px;
+  }
+  .vb-item:last-child { border-bottom: none; }
+  .vb-item .titulo { flex: 1; }
+  .vb-item .repo { font-size: 12px; color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <aside class="side">
+    <div class="brand"><span class="dot"></span> Tracer</div>
+    <div class="nav">To-Do</div>
+    <div class="nav active">Entregas do dia</div>
+    <div class="nav">1-on-1</div>
+    <div class="nav">Configurações</div>
+    <div class="version muted">v0.0.1 · POC</div>
+  </aside>
+
+  <div class="wrap" data-variant="A">
+    <div class="head" style="text-align:center"><h1>Entregas do dia</h1></div>
+    <div class="sub muted" style="text-align:center">Snapshot consolidado pelo daemon · 4 entregas</div>
+
+    <div class="day-nav">
+      <button>←</button>
+      <span class="day">hoje, 05/10</span>
+      <button style="opacity:.4">→</button>
+    </div>
+
+    <div class="va-timeline">
+      <div class="va-entry">
+        <div class="hora">09:14</div>
+        <div class="titulo">Movimentou card TRAC-331 para Done <span class="pill pill-jira">Jira</span></div>
+        <div class="meta">TRAC-331 — Corrigir payload do webhook</div>
+      </div>
+      <div class="va-entry">
+        <div class="hora">10:02</div>
+        <div class="titulo">Commit em totvs-pay <span class="pill pill-commit">commit</span></div>
+        <div class="meta">"fix: ajusta serialização do Account ID" · 3 arquivos</div>
+      </div>
+      <div class="va-entry">
+        <div class="hora">11:20</div>
+        <div class="titulo">Abriu PR #142 — auth-service <span class="pill pill-pr">PR</span></div>
+        <div class="meta">fix: valida token do webhook antes do processamento</div>
+      </div>
+      <div class="va-entry">
+        <div class="hora">14:45</div>
+        <div class="titulo">Revisou PR #147 — tracker-web <span class="pill pill-pr">PR</span></div>
+        <div class="meta">Changes requested · 1 comentário</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap" data-variant="B" hidden>
+    <div class="head" style="text-align:center"><h1>Entregas do dia</h1></div>
+    <div class="sub muted" style="text-align:center">Snapshot consolidado pelo daemon · 4 entregas</div>
+
+    <div class="day-nav">
+      <button>←</button>
+      <span class="day">hoje, 05/10</span>
+      <button style="opacity:.4">→</button>
+    </div>
+
+    <div class="vb-section">
+      <h2>Jira <span class="pill pill-jira">1</span></h2>
+      <div class="vb-item">
+        <span class="titulo">TRAC-331 — Corrigir payload do webhook <span class="pill">→ Done</span></span>
+        <span class="repo">09:14</span>
+      </div>
+    </div>
+
+    <div class="vb-section">
+      <h2>Commits <span class="pill pill-commit">1</span></h2>
+      <div class="vb-item">
+        <span class="titulo">"fix: ajusta serialização do Account ID"</span>
+        <span class="repo">totvs-pay · 10:02</span>
+      </div>
+    </div>
+
+    <div class="vb-section">
+      <h2>Pull Requests <span class="pill pill-pr">2</span></h2>
+      <div class="vb-item">
+        <span class="titulo">PR #142 — auth-service <span class="pill">aberto</span></span>
+        <span class="repo">11:20</span>
+      </div>
+      <div class="vb-item">
+        <span class="titulo">PR #147 — tracker-web <span class="pill">changes requested</span></span>
+        <span class="repo">14:45</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="switcher">
+  <button onclick="cycle(-1)" aria-label="Variante anterior">←</button>
+  <span id="sw-label"></span>
+  <button onclick="cycle(1)" aria-label="Próxima variante">→</button>
+</div>
+
+<script>
+  const VARIANTS = { A: "Timeline do dia", B: "Seções por fonte" };
+  function current() {
+    const v = new URLSearchParams(location.search).get("variant");
+    return VARIANTS[v] ? v : "A";
+  }
+  function render() {
+    const v = current();
+    document.querySelectorAll("[data-variant]").forEach(el => el.hidden = el.dataset.variant !== v);
+    document.getElementById("sw-label").textContent = v + " — " + VARIANTS[v];
+  }
+  function cycle(dir) {
+    const keys = Object.keys(VARIANTS);
+    const i = keys.indexOf(current());
+    const next = keys[(i + dir + keys.length) % keys.length];
+    const url = new URL(location);
+    url.searchParams.set("variant", next);
+    location.replace(url);
+  }
+  document.addEventListener("keydown", e => {
+    if (["INPUT","TEXTAREA"].includes(document.activeElement.tagName) || document.activeElement.isContentEditable) return;
+    if (e.key === "ArrowLeft") cycle(-1);
+    if (e.key === "ArrowRight") cycle(1);
+  });
+  render();
+</script>
+</body>
+</html>

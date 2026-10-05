@@ -108,6 +108,8 @@
   .va-entry .hora { font-size: 12px; color: var(--ink-soft); margin-bottom: 2px; }
   .va-entry .titulo { font-weight: 600; }
   .va-entry .meta { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+  .link { color: var(--ink); text-decoration: none; }
+  .link:hover { color: var(--accent); text-decoration: underline; }
 
   /* ================= VARIANT B — "Seções por fonte" ================= */
   .vb-section {
@@ -149,22 +151,22 @@
     <div class="va-timeline">
       <div class="va-entry">
         <div class="hora">09:14</div>
-        <div class="titulo">Movimentou card TRAC-331 para Done <span class="pill pill-jira">Jira</span></div>
+        <div class="titulo"><a href="https://rdstation.atlassian.net/browse/TRAC-331" class="link">Movimentou card TRAC-331 para Done</a> <span class="pill pill-jira">Jira</span></div>
         <div class="meta">TRAC-331 — Corrigir payload do webhook</div>
       </div>
       <div class="va-entry">
         <div class="hora">10:02</div>
         <div class="titulo">Commit em totvs-pay <span class="pill pill-commit">commit</span></div>
-        <div class="meta">"fix: ajusta serialização do Account ID" · 3 arquivos</div>
+        <div class="meta"><a href="https://github.com/ResultadosDigitais/totvs-pay/commit/abc123def456" class="link">"fix: ajusta serialização do Account ID"</a> · 3 arquivos</div>
       </div>
       <div class="va-entry">
         <div class="hora">11:20</div>
-        <div class="titulo">Abriu PR #142 — auth-service <span class="pill pill-pr">PR</span></div>
+        <div class="titulo"><a href="https://github.com/ResultadosDigitais/auth-service/pull/142" class="link">Abriu PR #142 — auth-service</a> <span class="pill pill-pr">PR</span></div>
         <div class="meta">fix: valida token do webhook antes do processamento</div>
       </div>
       <div class="va-entry">
         <div class="hora">14:45</div>
-        <div class="titulo">Revisou PR #147 — tracker-web <span class="pill pill-pr">PR</span></div>
+        <div class="titulo"><a href="https://github.com/ResultadosDigitais/tracker-web/pull/147" class="link">Revisou PR #147 — tracker-web</a> <span class="pill pill-pr">PR</span></div>
         <div class="meta">Changes requested · 1 comentário</div>
       </div>
     </div>

@@ -20,4 +20,4 @@ RuboCop e RSpec são instalados no projeto (Gemfile) — o `bin/setup` traz tudo
 
 - Lógica de domínio: `app/domains/*/use_cases` (interface `.call`) — controllers thin
 - Glossário: `CONTEXT.md` (geral) e `app/domains/todos/CONTEXT.md` (contexto Todos)
-- Decisões do wayfinding: `.scratch/wayfinder-tracer/` + issues do repo
+- Decisões do wayfinding: `.scratch/wayfinder-tracker/` + issues do repo

@@ -6,7 +6,7 @@ module Todos
   # notificação nativa com o resumo — "3 pendências: code review, 1-on-1, manual".
   # Resumo único por ciclo (decisão #7): quebra o hiperfoco sem bombardear.
   class NotifyPendingTodos
-    def initialize(repository: Repositories::TodoRepository.new, notifier: Tracer::NativeNotifier.new)
+    def initialize(repository: Repositories::TodoRepository.new, notifier: Tracker::NativeNotifier.new)
       @repository = repository
       @notifier = notifier
     end
@@ -16,7 +16,7 @@ module Todos
       return if pendencias.empty?
 
       resumo = "#{pendencias.size} pendência#{pendencias.size > 1 ? 's' : ''}: #{resumo_das_origens(pendencias)}"
-      @notifier.notify("Tracer", resumo)
+      @notifier.notify("Tracker", resumo)
       pendencias.each { |todo| incrementa_notificado_count(todo) }
       resumo
     end

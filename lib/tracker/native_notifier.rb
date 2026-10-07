@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Tracer
+module Tracker
   # Notificador nativo do S.O. — shell-out para os comandos nativos de cada
   # plataforma, sem gem/biblioteca de notificação (decisão do mapa: notificações
   # nativas via comandos do S.O. diretos).
@@ -19,7 +19,7 @@ module Tracer
     # Notificação de teste na primeira execução (bin/setup) — o usuário concede
     # permissão na hora (macOS/Windows pedem permissão na 1ª notificação).
     def self.test!
-      new.notify("Tracer", "Notificações funcionando! O Tracer vai lembrar você das pendências.")
+      new.notify("Tracker", "Notificações funcionando! O Tracker vai lembrar você das pendências.")
     end
 
     private
@@ -40,7 +40,7 @@ module Tracer
         $text.Item(0).AppendChild($template.CreateTextNode("#{title}")) | Out-Null
         $text.Item(1).AppendChild($template.CreateTextNode("#{body}")) | Out-Null
         $toast = [Windows.UI.Notifications.ToastNotification]::new($template)
-        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Tracer").Show($toast)
+        [Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("Tracker").Show($toast)
       PS
       system("powershell", "-NoProfile", "-Command", script)
     end

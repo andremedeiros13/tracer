@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Inicia o Tracer (spec §4): o `rails server` é o daemon — serve o painel
+# Inicia o Tracker (spec §4): o `rails server` é o daemon — serve o painel
 # (browser, http://localhost:3000) e roda o scheduler de notificações nativas
 # (thread em config/initializers/scheduler.rb).
 require "fileutils"

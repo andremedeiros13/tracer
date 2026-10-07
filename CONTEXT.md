@@ -1,4 +1,4 @@
-# Tracer
+# Tracker
 
 Ferramenta interna para engenheiros de software: rastreamento de entregas diárias,
 histórico de 1-on-1 via transcrições, e To-Dos com **notificações nativas do S.O.**

@@ -21,5 +21,5 @@ escopo da POC**, implementado após a validação dos critérios de sucesso.
 ## Fontes de verdade
 
 - Exemplos reais anexados no
-  [ticket #3](https://github.com/andremedeiros13/tracer/issues/3) (fonte de verdade)
+  [ticket #3](https://github.com/andremedeiros13/tracker/issues/3) (fonte de verdade)
 - PRD §3.2 (requisitos), wayfinder map issue #3

@@ -8,7 +8,7 @@ def system!(*args)
 end
 
 FileUtils.chdir APP_ROOT do
-  # Setup do Tracer (spec §4): gems + banco + seeds + notificação de teste.
+  # Setup do Tracker (spec §4): gems + banco + seeds + notificação de teste.
   # Idempotente — pode rodar a qualquer momento.
 
   puts "== Installing dependencies =="
@@ -26,7 +26,7 @@ FileUtils.chdir APP_ROOT do
 
   puts "\n== Testing native notifications =="
   puts "(na primeira execução no macOS/Windows, conceda a permissão quando o S.O. perguntar)"
-  system! "bin/rails runner 'Tracer::NativeNotifier.test!'"
+  system! "bin/rails runner 'Tracker::NativeNotifier.test!'"
 
-  puts "\n✓ Setup completo! Rode ./bin/start para iniciar o Tracer."
+  puts "\n✓ Setup completo! Rode ./bin/start para iniciar o Tracker."
 end

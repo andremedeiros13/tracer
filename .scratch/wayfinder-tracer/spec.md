@@ -1,12 +1,12 @@
-# Spec: POC do Tracer — To-Do com notificações nativas
+# Spec: POC do Tracker — To-Do com notificações nativas
 
 > Especificação de implementação, pronta para handoff. Todas as decisões vêm do
-> [Wayfinder map: Tracer](https://github.com/andremedeiros13/tracer/issues/1) —
+> [Wayfinder map: Tracker](https://github.com/andremedeiros13/tracker/issues/1) —
 > ver "Decisions so far" para o detalhe de cada decisão, com link para o ticket que a holds.
 
 ## 1. O quê
 
-Uma **POC** que valida a funcionalidade principal do Tracer: o **painel de To-Do com
+Uma **POC** que valida a funcionalidade principal do Tracker: o **painel de To-Do com
 notificações nativas do S.O.**, distribuído localmente para o time de engenharia.
 
 O daemon (processo no host) agenda e dispara **notificações nativas** para quebrar o
@@ -26,23 +26,23 @@ construído aqui):
 
 | Decisão | Resposta | Ticket |
 |---|---|---|
-| Forma | daemon no host + painel no browser | [#2](https://github.com/andremedeiros13/tracer/issues/2) |
-| Notificações | **nativas do S.O.** (requisito rígido) via `notify-send` / `osascript` / PowerShell toast | [#2](https://github.com/andremedeiros13/tracer/issues/2) |
-| Plataformas | só desktop — Linux (maioria), macOS, Windows (minoria) | [#2](https://github.com/andremedeiros13/tracer/issues/2) |
-| Stack | **Ruby on Rails monolito + SQLite** | [#5](https://github.com/andremedeiros13/tracer/issues/5) |
-| Front-end | server-side render (ERB), sem SPA/build step | [#5](https://github.com/andremedeiros13/tracer/issues/5) |
-| UI | **fila de atenção + sidebar de navegação**, conteúdo centralizado (max-width 900px) | [#6](https://github.com/andremedeiros13/tracer/issues/6) |
-| Ciclo de notificação | **resumo único por ciclo** — 1 notificação nativa com o count de pendências | [#7](https://github.com/andremedeiros13/tracer/issues/7) |
-| Estados da tarefa | **Pendente → Snoozed (até X) → Concluída** — "Adiar" silencia o lembrete, não move a tarefa | [#7](https://github.com/andremedeiros13/tracer/issues/7) |
-| Distribuição | clone + `bin/setup`/`bin/start`; daemon no login (systemd/LaunchAgent/Tarefa agendada) | [#8](https://github.com/andremedeiros13/tracer/issues/8) |
-| Arquitetura | **DDD com bounded contexts** | [#7 addendum](https://github.com/andremedeiros13/tracer/issues/7#issuecomment-5996056358) |
-| Linters | RuboCop + rubocop-rails; brakeman manual | [#7 addendum](https://github.com/andremedeiros13/tracer/issues/7#issuecomment-5996056358) |
-| Testes | RSpec + factory_bot (instalados no projeto via Gemfile) | [#7 addendum](https://github.com/andremedeiros13/tracer/issues/7#issuecomment-5996056358) |
+| Forma | daemon no host + painel no browser | [#2](https://github.com/andremedeiros13/tracker/issues/2) |
+| Notificações | **nativas do S.O.** (requisito rígido) via `notify-send` / `osascript` / PowerShell toast | [#2](https://github.com/andremedeiros13/tracker/issues/2) |
+| Plataformas | só desktop — Linux (maioria), macOS, Windows (minoria) | [#2](https://github.com/andremedeiros13/tracker/issues/2) |
+| Stack | **Ruby on Rails monolito + SQLite** | [#5](https://github.com/andremedeiros13/tracker/issues/5) |
+| Front-end | server-side render (ERB), sem SPA/build step | [#5](https://github.com/andremedeiros13/tracker/issues/5) |
+| UI | **fila de atenção + sidebar de navegação**, conteúdo centralizado (max-width 900px) | [#6](https://github.com/andremedeiros13/tracker/issues/6) |
+| Ciclo de notificação | **resumo único por ciclo** — 1 notificação nativa com o count de pendências | [#7](https://github.com/andremedeiros13/tracker/issues/7) |
+| Estados da tarefa | **Pendente → Snoozed (até X) → Concluída** — "Adiar" silencia o lembrete, não move a tarefa | [#7](https://github.com/andremedeiros13/tracker/issues/7) |
+| Distribuição | clone + `bin/setup`/`bin/start`; daemon no login (systemd/LaunchAgent/Tarefa agendada) | [#8](https://github.com/andremedeiros13/tracker/issues/8) |
+| Arquitetura | **DDD com bounded contexts** | [#7 addendum](https://github.com/andremedeiros13/tracker/issues/7#issuecomment-5996056358) |
+| Linters | RuboCop + rubocop-rails; brakeman manual | [#7 addendum](https://github.com/andremedeiros13/tracker/issues/7#issuecomment-5996056358) |
+| Testes | RSpec + factory_bot (instalados no projeto via Gemfile) | [#7 addendum](https://github.com/andremedeiros13/tracker/issues/7#issuecomment-5996056358) |
 
 ## 3. Arquitetura
 
 ```
-tracer/
+tracker/
 ├── app/
 │   ├── domains/
 │   │   ├── todos/               ← POC completa
@@ -90,7 +90,7 @@ tracer/
 ### 3.3. Painel (views, ERB)
 
 - **Fila de atenção** (validada no protótipo, branch `prototype/ui-todo-painel`):
-  - Sidebar: Tracer (marca) → To-Do (ativo) / Entregas do dia / 1-on-1 / Configurações
+  - Sidebar: Tracker (marca) → To-Do (ativo) / Entregas do dia / 1-on-1 / Configurações
     (módulos futuros como navegação visível)
   - Alertas ordenados por vencimento, ações por item (Concluir / Adiar 1h), badges
     de origem (via Jira / manual / transcrição)

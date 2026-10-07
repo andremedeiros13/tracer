@@ -4,8 +4,8 @@
 # `Todos::UseCases::NotifyPendingTodos` no intervalo configurado pelo usuário, respeitando
 # o período ativo. Thread daemon — morre com o processo do servidor.
 #
-# Desabilitável em testes/console: Tracer::Scheduler.disabled = true
-module Tracer
+# Desabilitável em testes/console: Tracker::Scheduler.disabled = true
+module Tracker
   class Scheduler
     class << self
       attr_accessor :disabled
@@ -16,12 +16,12 @@ module Tracer
 
     def start
       Thread.new do
-        Thread.current.name = "tracer-scheduler"
+        Thread.current.name = "tracker-scheduler"
         loop do
           disparar_se_no_periodo
           sleep intervalo_segundos
         rescue StandardError => e
-          Rails.logger.error("[tracer-scheduler] #{e.class}: #{e.message}")
+          Rails.logger.error("[tracker-scheduler] #{e.class}: #{e.message}")
         end
       end
     end
@@ -53,7 +53,7 @@ module Tracer
 end
 
 Rails.application.config.after_initialize do
-  next if defined?(Rails::Console) || Rails.env.test? || Tracer::Scheduler.disabled
+  next if defined?(Rails::Console) || Rails.env.test? || Tracker::Scheduler.disabled
 
-  Tracer::Scheduler.new.start
+  Tracker::Scheduler.new.start
 end

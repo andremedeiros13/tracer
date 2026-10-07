@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title><%= content_for(:title) || "Tracer" %></title>
+    <title><%= content_for(:title) || "Tracker" %></title>
     <%= stylesheet_link_tag "application" %>
   </head>
   <body>
     <div class="shell">
       <aside class="side">
-        <div class="brand"><span class="dot"></span> Tracer</div>
+        <div class="brand"><span class="dot"></span> Tracker</div>
         <nav>
           <%= link_to "To-Do", root_path, class: "nav #{current_page?(root_path) ? 'active' : ''}" %>
           <%= link_to "Entregas do dia", entregas_path, class: "nav #{current_page?(entregas_path) ? 'active' : ''}" %>

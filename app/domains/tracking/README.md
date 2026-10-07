@@ -20,5 +20,5 @@ implementado após a validação dos critérios de sucesso.
 ## Fontes de verdade
 
 - Pesquisa completa: branch `research/pesquisa-jira-github`,
-  `.scratch/wayfinder-tracer/research/pesquisa-jira-github.md`
+  `.scratch/wayfinder-tracker/research/pesquisa-jira-github.md`
 - PRD §3.1 (requisitos), wayfinder map issues #2 e #4

@@ -3,7 +3,7 @@
 require "rails_helper"
 
 RSpec.describe Todos::UseCases::NotifyPendingTodos do
-  let(:notifier) { instance_double(Tracer::NativeNotifier) }
+  let(:notifier) { instance_double(Tracker::NativeNotifier) }
   let(:use_case) { described_class.new(notifier: notifier) }
 
   describe "#call" do
@@ -13,7 +13,7 @@ RSpec.describe Todos::UseCases::NotifyPendingTodos do
       create(:todo, title: "c", origin: :manual)
 
       expect(notifier).to receive(:notify)
-        .with("Tracer", "3 pendências: via Jira (2), manual")
+        .with("Tracker", "3 pendências: via Jira (2), manual")
 
       resumo = use_case.call
       expect(resumo).to eq("3 pendências: via Jira (2), manual")
@@ -30,7 +30,7 @@ RSpec.describe Todos::UseCases::NotifyPendingTodos do
     it "snoozed vencido entra no ciclo" do
       create(:todo, snoozed_until: 1.minute.ago, status: :snoozed)
 
-      expect(notifier).to receive(:notify).with("Tracer", "1 pendência: manual")
+      expect(notifier).to receive(:notify).with("Tracker", "1 pendência: manual")
       use_case.call
     end
 

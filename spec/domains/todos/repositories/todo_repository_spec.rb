@@ -23,8 +23,8 @@ RSpec.describe Todos::Repositories::TodoRepository do
   before do
     allow(client).to receive(:query_database).and_return([
       page_notion(titulo: "agora", status: "Pendente"),
-      page_notion(titulo: "snoozed futuro", status: "Snoozed", snoozed_until: "2099-01-01T12:00:00.000Z"),
-      page_notion(titulo: "snoozed vencido", status: "Snoozed", snoozed_until: "2020-01-01T12:00:00.000Z")
+      page_notion(titulo: "snoozed futuro", status: "Em andamento", snoozed_until: "2099-01-01T12:00:00.000Z"),
+      page_notion(titulo: "snoozed vencido", status: "Em andamento", snoozed_until: "2020-01-01T12:00:00.000Z")
     ])
   end
 
@@ -41,7 +41,7 @@ RSpec.describe Todos::Repositories::TodoRepository do
       expect(client).to have_received(:query_database).with(
         filter: { or: [
           { property: "Status", status: { equals: "Pendente" } },
-          { property: "Status", status: { equals: "Snoozed" } }
+          { property: "Status", status: { equals: "Em andamento" } }
         ] }
       )
     end
@@ -49,7 +49,7 @@ RSpec.describe Todos::Repositories::TodoRepository do
     it "ordenada pelo que vence primeiro (snoozed volta no horário)" do
       allow(client).to receive(:query_database).and_return([
         page_notion(titulo: "criada antes", status: "Pendente"),
-        page_notion(titulo: "snoozed vencido", status: "Snoozed", snoozed_until: "2020-01-01T12:00:00.000Z")
+        page_notion(titulo: "snoozed vencido", status: "Em andamento", snoozed_until: "2020-01-01T12:00:00.000Z")
       ])
 
       expect(repository.notificaveis_agora.map(&:title)).to eq([ "snoozed vencido", "criada antes" ])

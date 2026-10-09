@@ -16,7 +16,7 @@ RSpec.describe Tracker::Notion::SchemaValidator do
   it "passa quando o Database tem o schema esperado" do
     properties = {
       "Name" => { "type" => "title" },
-      "Status" => { "type" => "status", "status" => { "options" => [ { "name" => "Pendente" }, { "name" => "Snoozed" }, { "name" => "Concluída" } ] } },
+      "Status" => { "type" => "status", "status" => { "options" => [ { "name" => "Pendente" }, { "name" => "Em andamento" }, { "name" => "Concluída" } ] } },
       "Origem" => { "type" => "select", "select" => { "options" => [ { "name" => "Manual" }, { "name" => "Via Jira" }, { "name" => "Via Transcrição" } ] } },
       "Snoozed até" => { "type" => "date" }
     }
@@ -45,6 +45,6 @@ RSpec.describe Tracker::Notion::SchemaValidator do
     allow(client).to receive(:retrieve_database).and_return(database_props(properties))
 
     expect { validator.validate! }
-      .to raise_error(Tracker::Notion::SchemaError, /opções ausentes Snoozed, Concluída/)
+      .to raise_error(Tracker::Notion::SchemaError, /opções ausentes Em andamento, Concluída/)
   end
 end

@@ -11,7 +11,7 @@ module Todos
       PROPERTIES = {
         "Name" => { type: "title" },
         "Status" => { type: "status", options: {
-          "Pendente" => :pendente, "Snoozed" => :snoozed, "Concluída" => :concluida
+          "Pendente" => :pendente, "Em andamento" => :snoozed, "Concluída" => :concluida
         } },
         "Origem" => { type: "select", options: {
           "Manual" => :manual, "Via Jira" => :via_jira, "Via Transcrição" => :via_transcricao

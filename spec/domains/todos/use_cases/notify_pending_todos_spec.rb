@@ -4,13 +4,34 @@ require "rails_helper"
 
 RSpec.describe Todos::UseCases::NotifyPendingTodos do
   let(:notifier) { instance_double(Tracker::NativeNotifier) }
-  let(:use_case) { described_class.new(notifier: notifier) }
+
+  # Fake in-memory do repository — mesma interface do adapter Notion.
+  let(:fake_repository) do
+    Class.new do
+      def initialize(todos) = @todos = todos
+
+      def notificaveis_agora
+        @todos.select(&:lembrete_ativo?)
+              .sort_by { |t| t.snoozed_until || t.created_at }
+      end
+    end
+  end
+
+  def todo(titulo:, origem: :manual, status: :pendente, snoozed_until: nil)
+    Todos::Entities::Todo.new(
+      page_id: "page-#{titulo}", title: titulo, origin: origem, status:,
+      snoozed_until:, created_at: 1.hour.ago, last_edited_time: 1.hour.ago
+    )
+  end
 
   describe "#call" do
     it "dispara UMA notificação com o resumo das pendências" do
-      create(:todo, title: "a", origin: :via_jira)
-      create(:todo, title: "b", origin: :via_jira)
-      create(:todo, title: "c", origin: :manual)
+      pendencias = [
+        todo(titulo: "a", origem: :via_jira),
+        todo(titulo: "b", origem: :via_jira),
+        todo(titulo: "c", origem: :manual)
+      ]
+      use_case = described_class.new(repository: fake_repository.new(pendencias), notifier: notifier)
 
       expect(notifier).to receive(:notify)
         .with("Tracker", "3 pendências: via Jira (2), manual")
@@ -20,26 +41,22 @@ RSpec.describe Todos::UseCases::NotifyPendingTodos do
     end
 
     it "não notifica quando não há pendências" do
-      create(:todo, status: :concluida)
-      create(:todo, snoozed_until: 1.hour.from_now, status: :snoozed)
+      sem_pendencias = [
+        todo(titulo: "concluida", status: :concluida),
+        todo(titulo: "snoozed", status: :snoozed, snoozed_until: 1.hour.from_now)
+      ]
+      use_case = described_class.new(repository: fake_repository.new(sem_pendencias), notifier: notifier)
 
       expect(notifier).not_to receive(:notify)
       expect(use_case.call).to be_nil
     end
 
     it "snoozed vencido entra no ciclo" do
-      create(:todo, snoozed_until: 1.minute.ago, status: :snoozed)
+      pendencias = [ todo(titulo: "a", snoozed_until: 1.minute.ago, status: :snoozed) ]
+      use_case = described_class.new(repository: fake_repository.new(pendencias), notifier: notifier)
 
       expect(notifier).to receive(:notify).with("Tracker", "1 pendência: manual")
       use_case.call
-    end
-
-    it "incrementa o contador de lembretes disparados" do
-      todo = create(:todo)
-      allow(notifier).to receive(:notify)
-
-      use_case.call
-      expect(todo.reload.notified_count).to eq(1)
     end
   end
 end

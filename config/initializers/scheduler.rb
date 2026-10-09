@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # Scheduler do daemon (spec §3.1): thread dentro do `rails server` que dispara
-# `Todos::UseCases::NotifyPendingTodos` no intervalo configurado pelo usuário, respeitando
-# o período ativo. Thread daemon — morre com o processo do servidor.
+# `Todos::UseCases::NotifyPendingTodos` no intervalo configurado por ENV vars
+# (TRACER_NOTIFY_*), respeitando o período ativo. Thread daemon — morre com o
+# processo do servidor.
 #
 # Desabilitável em testes/console: Tracker::Scheduler.disabled = true
 module Tracker
@@ -29,7 +30,7 @@ module Tracker
     private
 
     def intervalo_segundos
-      [ Setting.get("notify_interval_minutes").to_i * 60, INTERVALO_MINIMO_SEGUNDOS ].max
+      [ ENV.fetch("TRACER_NOTIFY_INTERVAL_MINUTES", "45").to_i * 60, INTERVALO_MINIMO_SEGUNDOS ].max
     end
 
     def disparar_se_no_periodo
@@ -40,8 +41,8 @@ module Tracker
 
     def periodo_ativo?
       agora = Time.current
-      inicio = parse_hora(Setting.get("notify_active_start"))
-      fim = parse_hora(Setting.get("notify_active_end"))
+      inicio = parse_hora(ENV.fetch("TRACER_NOTIFY_ACTIVE_START", "09:00"))
+      fim = parse_hora(ENV.fetch("TRACER_NOTIFY_ACTIVE_END", "18:00"))
       agora.between?(agora.change(hour: inicio.first, min: inicio.last),
                      agora.change(hour: fim.first, min: fim.last))
     end

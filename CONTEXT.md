@@ -8,6 +8,8 @@ para quebrar o estado de hiperfoco.
 
 - **Todos** — painel de To-Do e ciclo de notificação (a POC). Glossário:
   `app/domains/todos/CONTEXT.md`
+- **Frontend**: o Notion — os Databases do Notion são a UI da fila de atenção **e** a
+  fonte da verdade ([ADR 0001](docs/adr/0001-notion-como-frontend.md))
 - **Tracking** — rastreio de entregas (Jira, commits/PRs) — futuro:
   `app/domains/tracking/README.md`
 - **OneOnOnes** — parsing de transcrições de 1-on-1 — futuro:
@@ -22,6 +24,8 @@ para quebrar o estado de hiperfoco.
 - **Notificação nativa**: alerta do S.O. via comandos nativos (`notify-send` /
   `osascript` / PowerShell toast) — nunca notificação de browser
 - **Origem**: `manual` | `via_jira` | `via_transcricao`
+- **Detecção de mudanças**: polling incremental no ciclo do backend (`last_edited_time`
+  + cursor) — nunca webhook (ADR 0001)
 
 ## Diretrizes
 

@@ -17,7 +17,6 @@ module Todos
 
       resumo = "#{pendencias.size} pendência#{pendencias.size > 1 ? 's' : ''}: #{resumo_das_origens(pendencias)}"
       @notifier.notify("Tracker", resumo)
-      pendencias.each { |todo| incrementa_notificado_count(todo) }
       resumo
     end
 
@@ -31,11 +30,7 @@ module Todos
     end
 
     def label_da_origem(origem)
-      { "manual" => "manual", "via_jira" => "via Jira", "via_transcricao" => "1-on-1" }.fetch(origem, origem)
-    end
-
-    def incrementa_notificado_count(todo)
-      todo.update!(notified_count: todo.notified_count + 1)
+      { manual: "manual", via_jira: "via Jira", via_transcricao: "1-on-1" }.fetch(origem, origem)
     end
   end
   end

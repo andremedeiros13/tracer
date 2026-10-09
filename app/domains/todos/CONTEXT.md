@@ -20,5 +20,5 @@ Glossário do bounded context Todos — o painel de To-Do e o ciclo de notifica�
   Fora dela, o scheduler não notifica.
 - **Notificável agora**: tarefa pendente, ou snoozed cujo horário já venceu.
   Só notificáveis agora entram no ciclo.
-- **Lembreme disparado N x**: contador de quantas notificações a tarefa já apareceu —
-  sinaliza pendência ignorada.
+- **Entity imutável**: `Todos::Entities::Todo` é um `Data` — espelho de uma page
+  do Database; o backend só lê, o estado é editado no Notion (ADR 0001).

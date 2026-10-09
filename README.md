@@ -1,12 +1,16 @@
 # Tracker
 
-> 🔔 Painel de To-Do com **notificações nativas do sistema** — para quebrar o
+> 🔔 To-Do no **Notion** com **notificações nativas do sistema** — para quebrar o
 > hiperfoco e lembrar das pendências que importam.
 
-O Tracker roda como um **daemon no seu computador**: um processo de fundo que lembra
-você das suas pendências via **notificações nativas** (Linux, macOS, Windows) e serve
-um **painel no browser** com a *fila de atenção* — suas pendências ordenadas pelo que
-vence primeiro.
+O Tracker roda como um **daemon no seu computador**: um processo de fundo que lê
+seus To-Dos de um **Database do Notion** (a UI da fila de atenção **e** a fonte da
+verdade — [ADR 0001](docs/adr/0001-notion-como-frontend.md)) e lembra você via
+**notificações nativas** (Linux, macOS, Windows).
+
+Você edita as tarefas direto no Notion; o backend foca só no **ciclo de
+notificação**: 1 notificação por ciclo com o resumo das pendências
+("3 pendências: via Jira, manual"), nunca uma por tarefa.
 
 ---
 
@@ -16,6 +20,7 @@ vence primeiro.
 |---|---|
 | **Ruby 4.x** | `ruby --version` → precisa mostrar `4.0.x` ou superior |
 | **Linux**: `notify-send` | `which notify-send` (já vem na maioria das distros) |
+| **Notion Free** (ou superior) | a API funciona no plano Free — ver [Limites](https://developers.notion.com/reference/request-limits) |
 
 <details>
 <summary><b>Instalar o Ruby (só se você não tiver)</b></summary>
@@ -28,20 +33,46 @@ vence primeiro.
 
 ---
 
-## 🚀 Instalação (2 passos)
+## 🗂️ Setup do Notion (2 passos, uma vez só)
+
+1. **Crie o Database "To-Dos"** no Notion com exatamente estas propriedades:
+
+   | Propriedade | Tipo | Opções |
+   |---|---|---|
+   | `Name` | Title | — |
+   | `Status` | Status | `Pendente`, `Snoozed`, `Concluída` |
+   | `Origem` | Select | `Manual`, `Via Jira`, `Via Transcrição` |
+   | `Snoozed até` | Date | **com hora** (para snooze preciso) |
+
+   O boot valida o schema contra o esperado e **falha cedo** se divergir.
+
+2. **Conecte a integration ao Database**: crie uma connection interna em
+   [notion.so/profile/integrations](https://www.notion.so/profile/integrations),
+   copie o token, e no Database use o menu **••• → Add connections** para dar acesso.
+
+## 🚀 Instalação
 
 ```bash
 # 1. Clone o repositório
 git clone git@github.com:andremedeiros13/tracker.git
 cd tracker
 
-# 2. Setup — instala gems, prepara o banco e testa as notificações
+# 2. Configure as credenciais (export no shell ou .env — carregado pelo bin/start)
+cat > .env <<'EOF'
+TRACER_NOTION_TOKEN=secret_xxx
+TRACER_NOTION_DATABASE_ID=xxx
+TRACER_NOTIFY_INTERVAL_MINUTES=45
+TRACER_NOTIFY_ACTIVE_START=09:00
+TRACER_NOTIFY_ACTIVE_END=18:00
+EOF
+
+# 3. Setup — instala gems e testa as notificações
 bin/setup
 ```
 
-O `bin/setup` faz tudo: instala as dependências, prepara o banco SQLite com tarefas
-de exemplo, e **dispara uma notificação de teste** — se ela aparecer no seu sistema,
-tudo certo. (No macOS/Windows, conceda a permissão quando o S.O. perguntar.)
+O `bin/setup` instala as dependências, valida o schema do Database no Notion e
+**dispara uma notificação de teste** — se ela aparecer no seu sistema, tudo certo.
+(No macOS/Windows, conceda a permissão quando o S.O. perguntar.)
 
 ## ▶️ Execução
 
@@ -49,18 +80,19 @@ tudo certo. (No macOS/Windows, conceda a permissão quando o S.O. perguntar.)
 bin/start
 ```
 
-Abra **http://localhost:3000** — o painel com a fila de atenção. O daemon fica
-rodando em segundo plano e dispara o lembrete no intervalo configurado
+O daemon fica rodando em segundo plano: serve só o health check
+(http://localhost:3000/up) e dispara o lembrete no intervalo configurado
 (padrão: a cada 45 min, das 09:00 às 18:00).
 
-O painel mostra:
+**A fila de atenção é o Notion** — abra o Database "To-Dos" e veja suas pendências
+ordenadas pelo que vence primeiro. Para concluir ou snoozar, edite direto no Notion:
 
-- 🔔 **Fila de atenção** — pendências ordenadas pelo que vence primeiro
-- **Ações por item** — Concluir ou Adiar 1h (adiar silencia o lembrete; a tarefa
-  continua na fila até ser concluída)
-- **Origem das tarefas** — manual, via Jira ou de transcrição de 1-on-1
-  (na POC, tarefas de exemplo; as integrações vêm depois)
-- **Configuração de lembretes** — frequência e período ativo, embutidos no painel
+- **Concluir** → `Status: Concluída` (some da fila)
+- **Snoozar** → `Status: Snoozed` + `Snoozed até` com horário no futuro
+  (silencia o lembrete; volta quando o horário vence)
+
+A detecção de mudanças é **polling incremental** — dentro do intervalo, o daemon
+lê as pages que mudaram e notifica.
 
 ---
 
@@ -135,7 +167,7 @@ Register-ScheduledTask -TaskName "Tracker" -Action $action -Trigger $trigger
 
 ```bash
 bundle exec rubocop        # lint + formatação
-bundle exec rspec          # specs
+bundle exec rspec          # specs (fakes/stubs — zero rede)
 bundle exec brakeman       # security scan
 ```
 
@@ -143,12 +175,12 @@ Veja [CONTRIBUTING.md](CONTRIBUTING.md) para a estrutura do código.
 
 ## 🗺️ O projeto
 
-- **Decisões e roadmap**: [wayfinder map](https://github.com/andremedeiros13/tracker/issues/1)
-  (issues do repo) e [spec da POC](.scratch/wayfinder-tracker/spec.md)
+- **Decisões**: [ADR 0001 — Notion como frontend](docs/adr/0001-notion-como-frontend.md)
+  e [wayfinder map](https://github.com/andremedeiros13/tracker/issues/1)
 - **Módulos futuros** (após a validação da POC): rastreio de entregas
   (Jira + commits/PRs) e parsing de transcrições de 1-on-1
 - **Sem IA/LLM**: todo parsing é nativo da aplicação
 
 ---
 
-<sub>POC · Rails 8 + SQLite · daemon no host + painel no browser · notificações nativas</sub>
+<sub>POC · Rails 8 · daemon no host · Notion como frontend e fonte da verdade · notificações nativas</sub>

@@ -1,10 +1,8 @@
-#!/usr/bin/env ruby
-# Inicia o Tracker (spec §4): o `rails server` é o daemon — serve o painel
-# (browser, http://localhost:3000) e roda o scheduler de notificações nativas
-# (thread em config/initializers/scheduler.rb).
-require "fileutils"
-
-APP_ROOT = File.expand_path("..", __dir__)
-FileUtils.chdir APP_ROOT do
-  exec "bin/rails", "server", *ARGV
-end
+#!/usr/bin/env sh
+# Inicia o Tracker (spec §4 + ADR 0001): o `rails server` serve só o health
+# check (/up) e roda o scheduler de notificações nativas (thread em
+# config/initializers/scheduler.rb). A UI é o Notion.
+set -a
+[ -f .env ] && . ./.env
+set +a
+exec ./bin/rails server "$@"

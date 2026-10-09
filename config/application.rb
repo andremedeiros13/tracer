@@ -1,17 +1,15 @@
 require_relative "boot"
 
 require "rails"
-# Pick the frameworks you want:
-require "active_model/railtie"
-require "active_job/railtie"
-require "active_record/railtie"
-# require "active_storage/engine"
+# Pick the frameworks you want (ADR 0001 — Notion é a UI e a fonte da verdade;
+# o backend expõe só o health check):
 require "action_controller/railtie"
+# require "active_storage/engine"
 # require "action_mailer/railtie"
 # require "action_mailbox/engine"
 # require "action_text/engine"
-require "action_view/railtie"
-# require "action_cable/engine"
+# require "action_view/railtie"
+# require "active_cable/engine"
 require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
